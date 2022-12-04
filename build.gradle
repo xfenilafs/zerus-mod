@@ -1,0 +1,49 @@
+buildscript {
+    repositories {
+        gradlePluginPortal()
+        maven { url = 'https://repo.spongepowered.org/maven' }
+        maven { url = 'https://maven.minecraftforge.net/' }
+    }
+    dependencies {
+        classpath 'net.minecraftforge.gradle:ForgeGradle:5.1.+'
+        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
+    }
+}
+
+apply plugin: 'net.minecraftforge.gradle'
+
+minecraft {
+    mappings channel: 'stable', version: '39-1.12'
+}
+
+repositories {
+    maven {
+        url "https://repo.starfarm.fun/private"
+        credentials {
+            username System.getenv("SF_REPO_USER")
+            password System.getenv("SF_REPO_PASSWORD")
+        }
+    }
+}
+
+configurations {
+    shade
+    compile.extendsFrom shade
+}
+
+dependencies {
+    minecraft 'net.minecraftforge:forge:1.12.2-14.23.5.2860'
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    annotationProcessor 'org.projectlombok:lombok:1.18.24'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.24'
+
+    compileOnly 'ru.starfarm:client-api:1.0.5'
+}
+
+jar {
+    from configurations.shade.collect(project.&zipTree)
+}
+
+jar.finalizedBy('reobfJar')
+
+tasks.withType(JavaCompile)*.options*.encoding = "UTF-8"
